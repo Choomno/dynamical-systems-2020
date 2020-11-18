@@ -1,0 +1,306 @@
+\documentclass[x11names,reqno,14pt]{extarticle}
+\usepackage{preamble}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}{
+\pagestyle{fancy}{
+	\fancyhead[L]{}
+	\fancyhead[C]{Dynamical Systems}
+	\fancyhead[R]{Choomno Moos}
+  
+  \fancyfoot[R]{\footnotesize Page \thepage \ of \pageref{LastPage}}
+	\fancyfoot[C]{}
+	}
+\fancypagestyle{firststyle}{
+     \fancyhead[L]{}
+     \fancyhead[R]{}
+     \fancyhead[C]{}
+     \renewcommand{\headrulewidth}{0pt}
+	\fancyfoot[R]{\footnotesize Page \thepage \ of \pageref{LastPage}}
+}
+
+%%%%%%%%%%%% TITLE %%%%%%%%%%%%
+
+\begin{document}
+\title{Dynamical Systems Submission}
+\author{Choomno Moos\footnote{email: choom@pdx.edu}}
+\maketitle
+\thispagestyle{firststyle}
+\noi \hrulefill
+
+%%%%%%%%%%% CONTENT %%%%%%%%%%%
+\section{Implementation of a Root Finder via Multivariate Newton's Method}
+We implement a multivariate Newton's method to solve for one root of a system of nonlinear equations given by
+\begin{align*}
+	f(x) = \begin{pmatrix}
+		x_1 + 2x_2 - 3x_3 + 3\\
+		x_1^2 + 4x_2^2 - 4x_3\\
+		x_1^2 - x_2^2 - x_3^2
+	\end{pmatrix} = 0,
+\end{align*}
+where $x = (x_1,x_2,x_3)$. Geometrically, this represents the intersection of a plane, a paraboloid, and a double cone. A bit of 3D plotting suggests that there are four roots; this is especially apparent if we transform into the plane of the first equation, where we would see the problem reduced to finding the intersections of two conic sections.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{newton_surfaces.png}
+	\caption{A plot of the system of equations in question done in Geogebra. If you look carefully you can see that there are 4 roots.}
+\end{figure}
+\newpage
+\noi The multivariate Newton's method is given by
+\begin{align}
+	x_{n + 1} = x_n - J^{-1}(x_n)f(x_n),\label{newton}
+\end{align}
+where $J$ is the Jacobian matrix of $f$, so our first step is to compute the Jacobian matrix $J$ of $f(x)$, \[J = \begin{pmatrix}
+	1 & 2 & -2\\
+	2x_1 & 8x_2 & -4\\
+	3x_1^2 & -4x_2 & 2x_3
+\end{pmatrix}.\]
+We now make a slight alteration to the method given by equation \eqref{newton}. While calculating the inverse $J^{-1}$ is easy enough in this case, in general it is computationally prohibitive. So let $\Delta x_n = x_{n+1} - x_n$, and rewrite equation \eqref{newton} as
+\begin{align*}
+	J(x_n) \Delta x_{n} &= -f(x_n).
+\end{align*}
+We can then solve for $\Delta x_n$ using Gaussian elimination. We set out initial guess to be $x_0 = (-1,1,1)$, and implement the procedure in Python. The code is given below
+\begin{mdframed}[
+	backgroundcolor=Background,
+	hidealllines=true,
+	innertopmargin=0pt,
+	innerbottommargin=0pt,
+	innerleftmargin=0pt,
+	innerrightmargin=0pt
+	]
+\lstinputlisting[language=Python]{newtons_method.py}
+\end{mdframed}
+\pagebreak
+\noindent The program prints the following values for $x_n$:
+\begin{lstlisting}
+	[-1, 1, 1]
+	[-1.39473684  0.81578947  1.07894737]
+	[-1.34353582  0.79494319  1.08211686]
+	[-1.34267782  0.7946967   1.08223852]
+	[-1.3426776   0.79469667  1.08223858]
+	[-1.3426776   0.79469667  1.08223858]
+\end{lstlisting}
+Evaluating the function at the value of our final iterate yields a vector which is very, very close to zero. Given the constraints of floating point arithmetic, it is safe to say that our program has proven effective. Finding the other three solutions is only a matter of changing the initial value $x_0$ to be in the basin of attraction of each respective root.
+\newpage
+\section{Computer Generated Fractals}
+It's not hard to directly apply Newton's method to see approximately what the Julia set associated to $f : z \to z^3 - 1$ looks like. Below are two such images, they each took less than 10 minutes generate.
+\begin{figure}[H]
+	\centering
+	\includegraphics{z3-1.png}
+	\caption{Newton's method applied to $f : z \to z^3 - 1$}
+\end{figure}
+Here is another picture for $f : z \to z^4 + 1$.
+\begin{figure}[H]
+	\centering
+	\includegraphics{z4-1.png}
+	\caption{Newton's method applied to $f: z \to z^4 - 1$}
+\end{figure}
+
+The simplicity of my program have made the pictures look very crude; the divergent points aren't distinguished, so you can't actually see the Julia set (it is defined to lie on the fractal boundary, where orbits exhibit sensitive dependence), and there is no shading to indicate how many iterations were required before the point converged.
+
+Below is the Python code. Notice that it relies on large matrix computations (The matrix $Z$ defined on line 9 in the code below is an $n \times n$ complex-valued matrix, and we set $n = 10,000$!). This makes it memory intensive and thus slow. Still, I think that it's very nice in showing where Newton's method is being used.
+\begin{mdframed}[
+	backgroundcolor=Background,
+	hidealllines=true,
+	innertopmargin=0pt,
+	innerbottommargin=0pt,
+	innerleftmargin=0pt,
+	innerrightmargin=0pt
+	]
+	\lstinputlisting[language=Python]{julia_set.py}
+\end{mdframed}
+
+It turns out that, in general, the behavior of the family of complex functions given by $z \to z^n + c$ is very interesting and complicated, and can often yield pleasing fractal images. For now, we narrow our attention to the orbit under iteration of the family of complex functions $f_c(z) = z^2 + c$ where $z_0 = 0$. We prove a few simple facts.
+\begin{prop}
+	(Escape radius) for $|c| > 2$, the sequence $f^{\circ n}_c(z) = z^2 + c$ is not bounded. The sequence resulting from taking the modulus under iteration of $f$ with $|c| > 2$, $\{|f^{\circ n}_{|c| > 2}|\}_n$, increases monotonically to infinity.
+\end{prop}
+\begin{proof}
+	Assume $|c| > 2$. We proceed by induction. Observe that when $n = 1$,
+	\begin{align}
+		|f^{\circ 2}(0)| = |c^2 + c| \geq |c^2| - |c| = |c|(|c| - 1) > |c| = f_c(0)
+	\end{align}
+	So assume that for some $n$, $f_c^{\circ n} > c$. Then the quotient of the $n$th and $(n+1)$-th iterates is
+	\begin{align}
+		\frac{f_c^{\circ n + 1} (0)}{f_c^{\circ n}} = \frac{(f_c^{\circ n} (0))^2}{f_c^{\circ n}} \geq \frac{|f^n_c(0)|^2 - |c|}{|f_c^n(0)|} > |c| - 1 > 1.
+	\end{align}
+	It follows that $\{|f^{\circ n}_{c > 2}|\}_n$ is unbounded and increases monotonically. Thus we have shown the desired.\qedhere\\
+\end{proof}
+\begin{defn}
+	Let $f(z) = z^2 + c$. The \tbf{Mandelbrot space} $\mc{M}$ is a parameter space given by the Mandelbrot set of parameters for which the corresponding sequences under iteration of $f$ is bounded \[Mandelbrot = \{c \in \C : |f^{\circ n}(0)| \leq 2 \text{ for all }n \geq 0\}\]
+	with the subspace topology from Euclidean 2-space $(\C \cong \E^2)$.
+\end{defn}
+\begin{prop}
+	The Mandelbrot Space is a closed subset of Euclidean space.
+\end{prop}
+\begin{proof}
+	We prove that the complement of the Mandelbrot space $\C \setminus \mc{M}$ is open. Take $c \in \C \setminus \mc{M}$. Then by Proposition 1, for every real $r > 0$ there exists an $n$ such that $|f_c^n(0)| > r$. Fix one such $n$ with $r = 2$. Then call $\veps = |f_c^{\circ n}(0)|-2$, and observe that the $\veps$-neighborhood $U$ of $|f_c^{\circ n}(0)|$ is clearly an open neighborhood. Further, $f_c^{\circ n}$ is continuous, so the preimage $(f_c^{\circ n -1})^{-1}(U)$ is an open neighborhood of $c \in \C$. Further, we constructed $U$ such that it cannot intersect with the Mandelbrot set. Hence $\C \setminus \mc{M}$ is open, so $\mc{M}$ is closed.
+\end{proof} 
+\begin{cor}
+	The Mandelbrot space is compact, since it is a closed and bounded subset of a Euclidean space. This is a consequence of the Heine-Borel theorem.
+\end{cor}
+We now endeavor to take create an image of the Mandelbrot set. We iterate for parameters such that $|c| < 2$ and terminate when either $|z_n| > 2$ or when we reach an iteration limit. This time we shade our picture based on the number of iterations before divergence (black is bounded, and hence indicates containment in the Mandelbrot set). This method is called the \textit{escape time algorithm}.
+\begin{mdframed}[
+	backgroundcolor=Background,
+	hidealllines=true,
+	innertopmargin=0pt,
+	innerbottommargin=0pt,
+	innerleftmargin=0pt,
+	innerrightmargin=0pt
+	]
+	\lstinputlisting[language=Python]{mandelbrot.py}
+\end{mdframed}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{my_first_brot.PNG}
+	\caption{The Mandelbrot set image generated by our program. It's beautiful!}
+\end{figure}
+There are many interesting things about the Mandelbrot set. One that is particularly relevant is that there is a bijection of the Mandelbrot set's intersection with the real axis to the logistic family. To see this, first take the logistic family
+\begin{align}
+	x_{n+1} &= \mu x(1 - x),\\\intertext{and, ``completing the sqaure'', rewrite it as}
+	x_{n + 1} &= -\mu\pa*{x_n - \frac{1}{2}}^2 + \frac{\mu}{4}.
+\end{align}
+Then, apply the change of variables
+\begin{align}
+	z_n = i\sqrt{\mu} \pa*{x_n - \frac{1}{2}},\quad \text{and}\quad c = \frac{\mu}{4},
+\end{align}
+so that $x_{n+1} = z_{n+1} = z_n^2 + c$. Let us now find the values of $c$ for which the Mandelbrot set intersects the real line. The number $-2$ is in the Mandelbrot set by Proposition 1, and it is pretty obvious that $-2$ is real under iteration of $z \to z^2 + c$, so it must be the left bound. Now consider $c = 1/4$. If the iteration is to have a limit, it must be that $z = z^2 +c$, which has the solution \[z = \frac{1 + \sqrt{1 -4c}}{2}.\] Hence $z$ becomes imaginary at any $c > 1/4$, so the interval of intersection is $[-2,1/4]$.
+
+It turns out that, the Mandelbrot set exhibits period doubling in a similar way to the logistic map. Starting from the main cardioid, each bulb to the left doubles and eventually undergoes chaos. It is easy to make out corresponding features, for example the mini-brot to the left is the notable 3-period region of stability you can see on the bifurcation diagram of the logistic map.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{mandelbrot_correspondence.PNG}
+	\caption{The logistic map corresponds to $c \in [-2,1/4]$ in the Mandelbrot set.}
+\end{figure}
+\newpage
+Now let's see what happens when we fix a point $c$ in the Mandelbrot set and vary $z$ instead. Very little alteration of the code used to generate the Mandelbrot set yields a program to generate these sets.
+\begin{mdframed}[
+	backgroundcolor=Background,
+	hidealllines=true,
+	innertopmargin=0pt,
+	innerbottommargin=0pt,
+	innerleftmargin=0pt,
+	innerrightmargin=0pt
+	]
+%	\lstinputlisting[language=Python]{julia_set_new.py}
+\end{mdframed}
+
+When $|c| \leq 2$, we obtain what are called filled Julia sets. Like the Mandelbrot set, these sets exhibit fractal behavior. So in addition to being a fractal itself, each point in the Mandelbrot set corresponds to a yet another fractal!
+
+We tour some of the popular destinations; the $c$ value is provided, and some of these locations are named, in which case we indicate this. Each of these sets exhibit complicated behavior, like period multiplication, chaos, and interesting dynamics between the ``bulbs'' of bounded points.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{basilica.png}
+	\caption{``Basilica'', $c = -1$.}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{rabbit.png}
+	\caption{``Douady's Rabbit'', $c = -0.122 + 0.745i$.}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{dragon.png}
+	\caption{``Dragon'', $c = 0.360283 + 0.100376i$.}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{dust.png}
+	\caption{To maintain neutrality, we present one picture that's not so stunning.\\ $c = 0.45 + 0.1428i$. I believe this one is still topologically connected!}
+\end{figure}
+
+We have been looking at the sets generated under iteration of a quadratic family of complex-valued functions, however they are part of a much more general family. We conclude by formally introducing Julia sets.
+\begin{defn}
+	Call a complex function \[f(z) = \frac{p(z)}{q(z)}\] rational if $p$ and $q$ are complex polynomials. Let $f : \clo{\C} \to \clo{\C}$ be a non-constant holomorphic rational function from the Riemann sphere to itself where $p$ and $q$ have no common divisors. The \tbf{filled Julia set} corresponding to $f$ is the set of points $z$ which are bounded under iteration of $f$.
+\end{defn}
+\begin{defn}
+	The \tbf{Julia set} itself is the boundary of the filled Julia set, around which there is sensitive dependence on initial conditions. This means for a point $z$ in the Julia set and any $\delta > 0$, there is a $w$ in any neighborhood around $z$ where $z$ and $w$ are at least $\delta$ apart under iteration with $f$.
+\end{defn}
+\begin{rem}
+	By holomorphic we mean that $f$ is complex analytic, or complex differentiable. The Riemann sphere is the one-point compactification of the complex plane, $\C \cup \{\infty\}$ (or simply the extended complex numbers, if you prefer). Also note that there are several equivalent definitions of the Julia set, so this one is by no means definitive.
+\end{rem}
+
+\newpage
+\section{Numerically Finding Superstable of Orbits\\ of the Logistic Map $\bm{x \to \mu x(1-x)}$ for $\bm{\mu \in [3.5,3.8]}$}
+Note that it is sufficient to find the unique superstable points of each period in the period-doubling region of the logistic family, since after chaos commences, there are no stable orbits of period $2^n$.
+
+I tried to follow Sternberg's sketch for finding the superstable orbits. Here is the code.
+\begin{mdframed}[
+	backgroundcolor=Background,
+	hidealllines=true,
+	innertopmargin=0pt,
+	innerbottommargin=0pt,
+	innerleftmargin=0pt,
+	innerrightmargin=0pt
+	]
+	\lstinputlisting[language=Python]{superstable.py}
+\end{mdframed}
+
+For some reason it didn't work out so well; I was only able to confirm the first superstable point $\mu = 2$. I suspect is has to do with finding appropriate initial values. I look forward to seeing what my classmates have done with this.
+
+Another way that occurred to me as a way to find the superstable values of $\mu$ is using approximations of the Lyapunov exponent. One definition of the Lyapunov exponent is \[\lambda = \lim_{N \to \infty}\frac{1}{N} \sum_{n=1}^N \log_2 \abs*{\frac{dx_{n+1}}{dx_n}},\]
+so one can find an approximation of $\lambda$ by simply fixing $N$, in which case we obtain \[\lambda \approx \frac{1}{N} \sum_{n=1}^N \log_2 \abs{\mu - 2\mu x_0}.\]
+
+If we are able to find a sequence of partial sums of Lyapunov exponents that diverges to $-\infty$, then the corresponding parameter is superstable. Looking at the picture on the next page, you can clearly see asymptotes in the Lyapunov spectrum (denoted by the vertical blue lines). It is conceivable that one could select two points on either side, and use a sort of bisection method refine the approximation for $\mu$, thereby finding the desired convergent sequence. 
+
+Determining the superstable points this way is perhaps less complicated than Sternberg's method, although I have yet to work out the details.
+\begin{figure}
+	\includegraphics[width=\textwidth]{bifurcation.pdf}
+	\caption{We expect the superstable orbits to occur at the apparent asymptotes of the Lyapunov exponent}
+\end{figure}
+
+%\section{The Secant Method has Order Golden Mean Convergence}
+%\[x_{n+1} = x_n - \frac{(x_n - x_{n-1})f(x_n)}{f(x_n) - f(x_{n-1})}\]
+%\section{Critical Percolation Probability of a Hexagonal Lattice}
+%2) Write a different proof for the related pitchfork bifurcation (what is the relation?).
+%Numerically determine Feigenbaum's constant (as outlined in Sternberg)
+%2) Set g(y) = 1+ay^2+by^4 and try to solve eqn (2.13) for a and b.
+%\section{Proof of Sarkovski's Theorem}
+%1) Do this HW.
+%3) Show that conjugation of  $f : \R \to \R$ by a diffeo does not change the eigenvalues at a periodic fixed point.                                               
+%4) Fig 3.6 Sternberg: How long does F^n(x) stay in the ``bottleneck'' as fn of the distance of F to the diagonal.
+
+\end{document}
+\section{Proof of Quadratic Convergence for Newton's Method}
+Newton's method to find an approximation to the zero of a function $f:\R^n \to \R^m$ is given by the iterative map \[x_{n+1} = x_n - [Df(x_n)]^{-1}f(x_n),\] where $x_0$ is some estimate of the zero which is reasonably close to the actual value to be approximated.
+\begin{prop}
+	If a sequence converges under Newton's method, then it has quadratic convergence.
+\end{prop}
+\begin{proof}
+	Let $z$ denote a zero of $f$, and let $x$ be contained in the ball of radius $\mu$ about $z$, which we denote by $B_\mu(z)$. Assume the following conditions on $f$:
+	\begin{enumerate}
+		\item $f$ is $\delta$-Lipschitz continuously differentiable at each $x \in B_{\mu}(z)$ for $\mu \geq \norm{z - x_0}$. A stronger condition that is perhaps a bit simpler is that $f$ is $C^2$ over that region, i.e., twice continuously differentiable.
+		\item $Df(x) \neq 0$ for all $x \in B_{\mu}(z)$.
+		\item $[Df(x)]^{-1}$ exists for all $x \in B_\mu(z)$.
+	\end{enumerate}
+	Define $\gamma :[0,1] \to \R$ by $\gamma(t) = f(x + vt)$, where $v = z - x$ . Note that $\gamma(0) = f(x)$ and $\gamma(0) = f(z)$. Using the chain rule, we see that \[D\gamma(t) = Df(x+vt)v.\]
+	Then, \[\int_0^1 Df(x+vt)v dt = \int_0^1 D\gamma(t) dt = f(z) - f(x).\]
+	Since $f(z) = 0$, \[\int_0^1 Df(x+vt)v dt = f(z) - f(x) = -f(x).\] Next we subtract $Df(x)v$. Noting that $Df(x)v$ is constant with respect $t$, we find that \[ -f(x) - Df(x)v = \int_0^1 [Df(x + vt) - Df(x)]vdt = -f(x) - Df(x)(z-x).\] Now, since $[Df(x)]^{-1}$ is assumed to exist, we apply it to obtain
+	\begin{align}
+		[Df(x)]^{-1}\int_0^1 [Df(x + vt) - Df(x)]vdt &=-[Df(x)]^{-1}f(x) - [Df(x)]^{-1}Df(x)(z-x),\\
+		&= -[Df(x)]^{-1}f(x) - (z-x),\\
+		&= x - [Df(x)]^{-1}f(x) - z. \label{new}
+	\end{align}
+	Setting \[x_{new} = x - [Df(x)]^{-1}f(x),\] substitution into \eqref{new} yields
+	\begin{align}
+		x_{new} - z = 	[Df(x)]^{-1}\int_0^1 [Df(x + vt) - Df(x)]vdt\label{eq1}
+	\end{align}
+	Since we have assumed that $Df(x) \neq 0$ for all $x \in B_\mu(z)$, we can find a $\rho$ such that \[0 \leq \norm{[Df(x)]^{-1}} \leq \rho^{-1},\]
+	Further, by the $\delta$-Lipschitz continuity condition on $Df(x)$, we have \[\norm{Df(x_1) - Df(x_2)} \leq \delta \norm{x_1 - x_2}\] for $x_1,x_2 \in B_\mu(z)$. Since $x+vt,x \in B_\mu(z)$, and $t \geq 0$, it follows that
+	\begin{align}
+		\norm{[Df(x + vt) - Df(x)]v} &= \norm{[Df(x + vt) - Df(x)]} \norm{v}\\
+		&\leq \delta\norm{x + vt - x}\norm{v}\\
+		&\leq \delta \norm{vt}\norm{v} = \delta t \norm{v}^2 \label{sub}
+	\end{align}
+	We then obtain the following inequality from \eqref{eq1} after taking the norm and substituting \eqref{sub}: \[\norm{x_{new} - z} \leq \frac{1}{\rho} \int_0^1 \delta t\norm{v}^2 dt = \frac{\delta}{2\rho} \norm{v}^2 = \frac{\delta}{2\rho} \norm{x - z}^2,\]
+	which is the desired result.
+\end{proof}
+\noindent Now we show that the sequence converges
+\begin{prop}
+	Let $f(x)$ be a function with bounded first and second derivatives for all $x \in B$, with $B$ the closed unit ball, $1 < \tau < 2$, $K \geq 2^{3/4}$, and $c = \frac{3}{8} \ln K$. Then iteration under Newton's method starting at $x_0 = 0$ has all $x_n \in B$ and $\abs{x_n - x_{n-1}} \leq e^{-c\tau^n}$.
+\end{prop}
+\newpage

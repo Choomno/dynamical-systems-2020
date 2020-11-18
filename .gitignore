@@ -1,0 +1,10 @@
+# images written to the working folder when the scripts are run
+/*.png
+
+# LaTeX build files
+*.aux
+*.log
+*.synctex.gz
+*.out
+
+__pycache__/
