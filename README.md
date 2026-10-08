@@ -6,7 +6,7 @@ University, taken in my junior year (October–November 2020; course text: Stern
 which is included as LaTeX source and PDF.
 
 > Archived to GitHub in 2026. The code, figures and write-up are unchanged from
-> 2020. This README and `docs/` were written in 2026.
+> 2020. This README, `docs/` and `reconstructed/` were written in 2026.
 
 <p align="center">
   <img src="figures/rabbit.png" width="49%" alt="Filled Julia set of z² + c for c = −0.122 + 0.745i (Douady's rabbit), escape-time shading">
@@ -66,6 +66,7 @@ was.
 * **The bifurcation/Lyapunov and cobweb programs are lost.** Only the 2020 output
   above survives (`bifurcation.pdf`). I believe I wrote them on CoCalc, and that
   account no longer exists.
+  For new versions, see [Reconstructions (2026)](#reconstructions-2026).
 * **`superstable.py` updates in the wrong order.** It overwrites `x` before using it
   in the derivative recursion $\partial_\mu x_{k+1} = x_k(1-x_k) + \mu(1-2x_k)\,\partial_\mu x_k$,
   so Newton's method gets the wrong slope. That is why the write-up could only
@@ -83,3 +84,21 @@ was.
   step 431, beyond the program's 255-iteration cap.
 * **`newton_julia.py` uses a 10 000 × 10 000 complex grid.** Each array is about
   1.6 GB, which is why it was slow. Use a smaller `n` to try it.
+
+## Reconstructions (2026)
+
+`reconstructed/` holds new versions of the two lost programs, written in 2026 and
+committed separately from the 2020 material.
+
+* `bifurcation_lyapunov.py` redraws the 2020 figure. The top panel shows the
+  long-run orbit for 4000 values of μ in [3.5, 3.8]. The bottom panel shows the
+  Lyapunov exponent $\lambda \approx \frac{1}{N}\sum_{n}\log\lvert\mu(1-2x_n)\rvert$,
+  red where it is positive. The vertical lines are the period-8, 16 and 32
+  superstable parameters, found with the corrected Newton iteration.
+* `cobweb.py` draws cobweb (web) diagrams. The `cobweb()` function works for any map
+  on [0, 1]. The script draws the logistic map at μ = 2.8, 3.3, 3.5 and 3.9: a fixed
+  point, period 2, period 4 and chaos.
+
+<p align="center">
+  <img src="reconstructed/cobweb.png" width="60%" alt="Cobweb diagrams of the logistic map at mu = 2.8, 3.3, 3.5 and 3.9: a staircase spiralling into a fixed point, settling onto a 2-cycle, onto a 4-cycle, and wandering chaotically">
+</p>
