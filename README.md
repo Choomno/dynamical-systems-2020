@@ -24,8 +24,9 @@ which is included as LaTeX source and PDF.
 | `julia_set.py` | The same algorithm with $c$ fixed and $z_0$ varying, which draws filled Julia sets. The figures for other values of $c$ come from editing one line. |
 | `superstable.py` | Newton's method in the parameter μ, aimed at the superstable 2ⁿ-periodic orbits of the logistic map $x \mapsto \mu x(1-x)$, i.e. solutions of $f_\mu^{N}(1/2) = 1/2$. See the notes below. |
 
-Requires Python 3 with NumPy, SciPy, Matplotlib and Pillow. Each script runs on its
-own: `python code/mandelbrot.py`.
+Requires Python 3 with NumPy, SciPy, Matplotlib and Pillow. The original scripts reflect their 2020 interactive workflow; output handling and
+resource use differ. For safe, reproducible modern figures, follow
+[the reconstruction commands](docs/reproduce.md).
 
 ## Figures (`figures/`)
 
@@ -87,7 +88,7 @@ was.
 
 ## Reconstructions (2026)
 
-`reconstructed/` holds new versions of the two lost programs, written in 2026 and
+`reconstructed/` holds modern companions and new versions of the two lost programs, written in 2026 and
 committed separately from the 2020 material.
 
 * `bifurcation_lyapunov.py` redraws the 2020 figure. The top panel shows the
@@ -95,10 +96,20 @@ committed separately from the 2020 material.
   Lyapunov exponent $\lambda \approx \frac{1}{N}\sum_{n}\log\lvert\mu(1-2x_n)\rvert$,
   red where it is positive. The vertical lines are the period-8, 16 and 32
   superstable parameters, found with the corrected Newton iteration.
+* `newton_basins.py` redraws the Newton basins with bounded memory, configurable
+  resolution, and explicit unresolved points.
 * `cobweb.py` draws cobweb (web) diagrams. The `cobweb()` function works for any map
   on [0, 1]. The script draws the logistic map at μ = 2.8, 3.3, 3.5 and 3.9: a fixed
   point, period 2, period 4 and chaos.
 
 <p align="center">
   <img src="reconstructed/cobweb.png" width="60%" alt="Cobweb diagrams of the logistic map at mu = 2.8, 3.3, 3.5 and 3.9: a staircase spiralling into a fixed point, settling onto a 2-cycle, onto a 4-cycle, and wandering chaotically">
+</p>
+
+Regeneration commands, numerical conventions, and output formats are in
+[Reproduce the modern experiments](docs/reproduce.md). The companions export
+PDF and PNG, record their parameters and library versions, and have numerical tests.
+
+<p align="center">
+  <img src="docs/newton_basins.png" width="65%" alt="Modern Newton basins with residual-certified root colors and unresolved points marked gray">
 </p>

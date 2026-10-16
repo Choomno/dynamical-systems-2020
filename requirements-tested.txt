@@ -1,0 +1,4 @@
+# Versions used for the 2026 reconstruction checks. Python 3.12.14.
+numpy==2.5.4
+matplotlib==3.11.2
+pytest==9.1.1

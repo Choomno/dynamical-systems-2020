@@ -8,3 +8,8 @@
 *.out
 
 __pycache__/
+
+# Modern regenerations and local environments
+/generated/
+/.venv/
+.pytest_cache/
