@@ -5,7 +5,7 @@ from common import save_figure
 
 
 def classify(z0, degree=4, iterations=50, tolerance=1e-8):
-    """Root indices 0..degree-1, or -1 when no residual-certified root is found."""
+    """Root indices 0..degree-1, or -1 when no residual-checked root is found."""
     if degree < 2 or iterations < 1 or tolerance <= 0:
         raise ValueError('invalid Newton iteration parameters')
     z = np.asarray(z0, dtype=complex).copy()
