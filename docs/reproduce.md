@@ -15,6 +15,20 @@ python reconstructed/newton_basins.py --resolution 800
 For the exact direct dependency versions used in the reconstruction checks,
 install `requirements-tested.txt` instead.
 
+To check the maintained reconstruction and tests:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m ruff check .
+python -m ruff format --check .
+python -m pytest -q
+```
+
+`ruff.toml` limits linting and formatting to `reconstructed/` and `tests/`.
+The historical `code/`, `figures/`, and `writeup/` are preserved artifacts;
+they are excluded from modern style checks and automatic fixes. There is no
+package build: run the three scripts above to check figure regeneration.
+
 Each command writes a PNG preview, PDF, and JSON parameters/version record in
 `generated/`. The basin and bifurcation commands also save numerical arrays in
 NPZ files. Use `--output PATH` to choose a different basename. These outputs are
