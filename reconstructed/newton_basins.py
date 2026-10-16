@@ -52,7 +52,9 @@ def main():
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap, BoundaryNorm
     from matplotlib.patches import Patch
-    colors = ['#eeeeee'] + [plt.get_cmap('tab20')(k / max(args.degree, 1)) for k in range(args.degree)]
+    palette = ['#2878b5', '#e87524', '#369959', '#9756a6', '#ca4a4a', '#8c564b',
+               '#cf6a9f', '#a58a12', '#24a5a5', '#305a80', '#9acb72', '#f4b85b']
+    colors = ['#eeeeee'] + palette[:args.degree]
     cmap = ListedColormap(colors)
     fig, ax = plt.subplots(figsize=(6.5,6), layout='constrained')
     # Pixel centers agree with the sampled domain, including its endpoints.
